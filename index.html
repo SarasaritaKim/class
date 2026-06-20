@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="교사를 위한 스마트하고 인터랙티브한 학급 자리 배치 프로그램. 룰렛 애니메이션, 드래그 앤 드롭, 고정석 및 통로 지정 지원.">
+  <title>🎯 스마트 학급 자리 배치 시스템</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">
+        <i data-lucide="layout-grid"></i>
+      </div>
+      <div>
+        <h1>🎯 스마트 학급 자리 배치</h1>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button id="theme-toggle" class="theme-switch-btn" title="테마 변경">
+        <i data-lucide="moon" class="moon-icon"></i>
+        <i data-lucide="sun" class="sun-icon"></i>
+      </button>
+      <button id="btn-print" class="btn btn-outline" style="width: auto; padding: 0.5rem 1rem;">
+        <i data-lucide="printer"></i> 인쇄 / PDF 저장
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    
+    <!-- Left Sidebar: Controls & Settings -->
+    <aside class="sidebar">
+      
+      <!-- Student List Input Card -->
+      <section class="card">
+        <h2 class="card-title"><i data-lucide="users"></i> 학생 명단 관리</h2>
+        
+        <!-- Preset Management -->
+        <div class="form-group">
+          <label for="roster-select">학급 목록 선택</label>
+          <div class="roster-actions">
+            <select id="roster-select">
+              <option value="new">새로운 명단 작성...</option>
+            </select>
+            <button id="btn-delete-roster" class="btn btn-outline" style="padding: 0;" title="명단 삭제">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Roster Input -->
+        <div class="form-group">
+          <label for="student-input">학생 이름 입력 (엔터/줄바꿈 구분)</label>
+          <textarea id="student-input" placeholder="홍길동&#10;김철수&#10;이영희..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="roster-name">명단 저장 이름</label>
+          <div class="roster-actions">
+            <input type="text" id="roster-name" placeholder="예: 3학년 1반">
+            <button id="btn-save-roster" class="btn btn-outline" style="font-size: 0.85rem;">저장</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grid Config Card -->
+      <section class="card">
+        <h2 class="card-title"><i data-lucide="settings"></i> 배치 옵션 설정</h2>
+        
+        <div class="form-group">
+          <label>교실 자리 크기 (행 × 열)</label>
+          <div class="grid-dims">
+            <input type="number" id="rows-input" value="5" min="1" max="10" title="행 (세로 줄 수)">
+            <span>×</span>
+            <input type="number" id="cols-input" value="6" min="1" max="10" title="열 (가로 줄 수)">
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="btn-instant-shuffle" class="btn btn-primary">
+            <i data-lucide="zap"></i> 즉시 랜덤 배치
+          </button>
+          <button id="btn-roulette-shuffle" class="btn btn-secondary">
+            <i data-lucide="play-circle"></i> 룰렛 순차 배치
+          </button>
+          <button id="btn-reset-grid" class="btn btn-outline">
+            <i data-lucide="refresh-cw"></i> 자리 초기화
+          </button>
+        </div>
+      </section>
+
+      <!-- Stats Card -->
+      <section class="card">
+        <h2 class="card-title"><i data-lucide="bar-chart-2"></i> 배치 통계</h2>
+        <div class="stats-list">
+          <div class="stat-item">
+            <div id="stat-total-seats" class="stat-value">30</div>
+            <div class="stat-label">총 좌석</div>
+          </div>
+          <div class="stat-item">
+            <div id="stat-students" class="stat-value">0</div>
+            <div class="stat-label">배치 학생</div>
+          </div>
+          <div class="stat-item">
+            <div id="stat-available" class="stat-value">30</div>
+            <div class="stat-label">빈 좌석</div>
+          </div>
+        </div>
+        
+        <!-- Legend description -->
+        <div class="legend-grid">
+          <div class="legend-item"><div class="legend-color occupied"></div> 일반배치</div>
+          <div class="legend-item"><div class="legend-color fixed"></div> 고정석 (Pin)</div>
+          <div class="legend-item"><div class="legend-color blocked"></div> 통로/장애물</div>
+          <div class="legend-item"><div class="legend-color empty"></div> 빈자리</div>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- Right Side: Classroom Grid View -->
+    <main class="seating-area">
+      <!-- Board indicator showing where the front is -->
+      <div class="classroom-front">
+        <span>👩‍🏫 칠 판 / 교 탁 방향 (앞)</span>
+      </div>
+
+      <!-- Seating Grid Container -->
+      <div id="grid-container" class="grid-container-card">
+        <div id="classroom-grid" class="classroom-grid"></div>
+
+        <!-- Roulette Screen Overlay -->
+        <div id="roulette-overlay" class="roulette-overlay">
+          <div class="roulette-box">
+            <div class="roulette-title">🎰 룰렛 자리 배정 중...</div>
+            <div id="roulette-name" class="roulette-name">-</div>
+            <div id="roulette-seat-desc" class="roulette-seat-desc">좌석 번호: -</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast" class="toast">
+    <i data-lucide="info"></i>
+    <span id="toast-message">알림 메시지</span>
+  </div>
+
+  <!-- JavaScript logic -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+  </script>
+</body>
+</html>
